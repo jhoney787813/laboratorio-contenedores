@@ -1,0 +1,43 @@
+name: Deploy Landing Page to GitHub Pages
+
+on:
+  # Se ejecutará automáticamente cuando subas cambios a la rama principal (main)
+  push:
+    branches: ["main"]
+  # Permite ejecutar el workflow manualmente desde la pestaña Actions en GitHub
+  workflow_dispatch:
+
+# Permisos necesarios para que GitHub Actions pueda publicar en Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Permite solo un despliegue concurrente, saltando despliegues encolados si hay nuevos
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Trabajo de Construcción/Empaquetado
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+      
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+      
+      - name: Subir artefacto (La carpeta landing-page)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Le indicamos a GitHub que solo suba la carpeta de la landing page
+          path: './landing-page'
+          
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
