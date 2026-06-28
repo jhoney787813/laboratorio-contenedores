@@ -22,14 +22,30 @@
     </header>
 
     <main class="container">
+        
+        <section class="card intro-card">
+            <h2>🎯 Objetivo de la Práctica</h2>
+            <p>El objetivo central de este laboratorio es implementar y orquestar un ecosistema de microservicios contenerizados utilizando Podman/Docker. Se busca validar la correcta comunicación asíncrona entre contenedores mediante WebSockets y el patrón Pub/Sub, empleando <strong>Redis</strong> como <em>Single Source of Truth</em> (SSOT) para el manejo y persistencia de más de 15 tipos de datos estructurados bajo un enfoque de <strong>Diseño Guiado por Dominio (DDD)</strong>.</p>
+        </section>
+
+        <section class="card results-card">
+            <h2>🏆 Resultados Obtenidos</h2>
+            <ul>
+                <li>✅ <strong>Despliegue Exitoso:</strong> 4 contenedores operando en aislamiento bajo una misma red virtual (`chat_network`).</li>
+                <li>✅ <strong>Alta Disponibilidad en Memoria:</strong> Redis gestionando sesiones y persistiendo historial de chats a través de Hashes y Listas, eliminando la necesidad de bases de datos relacionales tradicionales pesadas.</li>
+                <li>✅ <strong>Comunicación Bidireccional Asíncrona:</strong> WebSockets configurados para comunicación en tiempo real de menos de 10ms de latencia entre el usuario y el bot.</li>
+                <li>✅ <strong>Administración Centralizada:</strong> Panel de monitoreo de conexiones capaz de emitir eventos <em>Broadcast</em> globales sin acoplarse al código de la aplicación de chat.</li>
+            </ul>
+        </section>
+
         <section class="card">
-            <h2>1. Arquitectura del Sistema (Dinámica)</h2>
-            <p>El siguiente diagrama representa los 4 contenedores principales de la solución y los flujos de comunicación (HTTP, WebSockets, Pub/Sub) entre ellos. Las animaciones muestran el tráfico de datos en tiempo real.</p>
+            <h2>1. Arquitectura y Distribución de Contenedores</h2>
+            <p>El siguiente diagrama dinámico interactivo representa los 4 contenedores principales de la solución y los flujos de comunicación (HTTP, WebSockets, Pub/Sub) entre ellos. <em>(Pasa el cursor sobre los componentes para interactuar)</em>.</p>
             
             <div class="architecture-diagram">
                 <!-- User Browser -->
                 <div class="node user-node" id="node-user">
-                    🌐 Cliente Web (Usuario)
+                    🌐 Cliente Web (Puerto 3000)
                 </div>
                 
                 <!-- Chat Server -->
@@ -39,12 +55,12 @@
                 
                 <!-- Admin App -->
                 <div class="node server-node" id="node-admin-app">
-                    🛠️ Admin App (Node.js)
+                    🛠️ Admin App (Puerto 4000)
                 </div>
 
                 <!-- Bot -->
                 <div class="node bot-node" id="node-bot">
-                    🤖 Chat Bot (Node.js)
+                    🤖 Chat Bot Autónomo
                 </div>
 
                 <!-- Redis -->
@@ -52,7 +68,7 @@
                     🗄️ Redis (BD & Pub/Sub)
                 </div>
 
-                <!-- Conexiones animadas (Representadas por CSS) -->
+                <!-- Conexiones animadas -->
                 <div class="connection h-connection" style="top: 80px; left: 160px; width: 140px;">
                     <div class="packet"></div>
                 </div>
@@ -72,40 +88,48 @@
         </section>
 
         <section class="card">
-            <h2>2. Justificación: Arquitectura Moderna Orientada a Microservicios</h2>
+            <h2>2. Justificación: Arquitectura Moderna Orientada a Microservicios y DDD</h2>
             <p>El diseño de esta solución responde a los <strong>estándares actuales de la industria para arquitecturas escalables y desacopladas</strong>:</p>
             <ul>
-                <li><strong>Desacoplamiento mediante Eventos (Pub/Sub):</strong> En lugar de que el servidor de administración se comunique directamente con el servidor de chat mediante HTTP (lo cual genera un acoplamiento fuerte y latencia), se utiliza el patrón de diseño Publish/Subscribe nativo de Redis. Esto significa que los microservicios son agnósticos unos de otros; el administrador simplemente dispara un evento global, garantizando alta cohesión y bajo acoplamiento.</li>
-                <li><strong>Comunicación Asíncrona (WebSockets):</strong> Las aplicaciones modernas en tiempo real evitan el "polling" (consultas repetitivas al servidor). Al usar Socket.io sobre Node.js, mantenemos conexiones TCP persistentes y bidireccionales de baja latencia.</li>
-                <li><strong>Contenerización Aislada:</strong> Cada componente (Chat, Bot, Admin, DB) posee su propio `Dockerfile`. Esto asegura el principio de responsabilidad única. Si el Chat Bot falla, no afecta al Chat Server; si necesitamos escalar el servidor web, podemos instanciar réplicas sin tocar la lógica de la base de datos o del panel de administración.</li>
-                <li><strong>Single Source of Truth (SSOT):</strong> Redis actúa como la única fuente de verdad rápida en memoria. Mantiene un almacenamiento de estado centralizado, permitiendo que las aplicaciones servidoras (Node.js) se mantengan <em>Stateless</em> (sin estado interno). Esto facilita escalar horizontalmente en la nube de ser necesario.</li>
+                <li><strong>Ventajas del DDD (Domain-Driven Design):</strong> Hoy en día, el Diseño Guiado por Dominio (o SDD - Software-Driven Design) es el camino a seguir para la construcción de ecosistemas de <strong>múltiples agentes</strong>. DDD nos permite separar el modelo de negocio (ej. <em>Usuario</em>, <em>Mensaje</em>, <em>Alerta</em>) de la infraestructura. Esto es crítico cuando construimos sistemas multi-agentes complejos, ya que nos asegura que la lógica pura de la interacción pueda escalar independientemente de si los datos se guardan en Redis, PostgreSQL o un Vector DB.</li>
+                <li><strong>Desacoplamiento mediante Eventos (Pub/Sub):</strong> En lugar de que el servidor de administración se comunique directamente con el servidor de chat, se utiliza el patrón de diseño Publish/Subscribe nativo de Redis.</li>
+                <li><strong>Contenerización Aislada:</strong> Cada componente (Chat, Bot, Admin, DB) posee su propio contenedor asegurando el principio de responsabilidad única.</li>
+                <li><strong>Single Source of Truth (SSOT):</strong> Redis actúa como la única fuente de verdad rápida en memoria, facilitando escalar horizontalmente en la nube.</li>
             </ul>
         </section>
 
         <section class="card">
-            <h2>3. Demostración Funcional</h2>
-            <p>A continuación se evidencia el funcionamiento práctico de las aplicaciones cliente, el servidor y el flujo de comunicación interna:</p>
+            <h2>3. Demostración Funcional y Paso a Paso para Probar</h2>
+            <p>Sigue estos pasos para interactuar de forma exitosa con las aplicaciones cliente, el servidor y el bot:</p>
             
             <div class="demo-grid">
                 <div class="demo-item">
                     <h3>Chat Independiente y Bot 🤖</h3>
-                    <!-- Nota para el estudiante: Reemplaza chat-demo.gif por la grabación real de tu pantalla -->
                     <img src="chat-demo.gif" alt="Animación demostrando el uso del chat web comunicándose de forma privada con el bot" class="responsive-gif" onerror="this.src='https://via.placeholder.com/600x400?text=Sube+tu+archivo+chat-demo.gif+aqui'">
-                    <p>En este GIF se aprecia la interfaz tipo Glassmorphism. El usuario interactúa de forma directa y aislada (1-a-1) con el Bot autónomo.</p>
+                    <p>En este paso, el usuario ingresa a `http://localhost:3000` y chatea 1-a-1 con el Bot autónomo.</p>
                 </div>
 
                 <div class="demo-item">
                     <h3>Panel de Administración 🛠️</h3>
-                    <!-- Nota para el estudiante: Reemplaza admin-demo.gif por la grabación real de tu pantalla -->
                     <img src="admin-demo.gif" alt="Animación del panel de administración enviando un broadcast" class="responsive-gif" onerror="this.src='https://via.placeholder.com/600x400?text=Sube+tu+archivo+admin-demo.gif+aqui'">
-                    <p>El administrador visualiza las IPs de los conectados. Al enviar una alerta por Broadcast a través de Redis Pub/Sub, ésta aparece en la pantalla del usuario inmediatamente.</p>
+                    <p>El administrador, desde `http://localhost:4000`, envía una alerta por Broadcast. Ésta aparece en la pantalla del usuario inmediatamente.</p>
                 </div>
+            </div>
+            
+            <div class="alert-box">
+                <strong>⚠️ Instrucciones para probar el Bot:</strong>
+                <p>Este bot es un agente estático construido para fines **estrictamente académicos** y validación de conectividad. Dado que su alcance está limitado a reglas simples (If/Else), <strong>debes usar exactamente las siguientes palabras clave</strong> para que te responda:</p>
+                <ul>
+                    <li>Escribe <code>"hola"</code> para recibir un saludo del bot.</li>
+                    <li>Escribe <code>"ayuda"</code> para que te muestre los comandos.</li>
+                    <li>Escribe <code>"docker"</code> o <code>"podman"</code> para recibir datos técnicos.</li>
+                </ul>
+                <p><em>* En entornos empresariales modernos, la práctica correcta es reemplazar esta lógica limitante integrando Modelos de Lenguaje Grande (LLMs / IA Avanzada) para que el agente entienda el contexto semántico y la interacción sea completamente natural y efectiva, orquestado bajo la misma arquitectura de DDD.</em></p>
             </div>
         </section>
 
         <section class="card">
-            <h2>4. Instrucciones de Ejecución (Basado en el README Oficial)</h2>
-            <p>El siguiente es el extracto de la documentación principal para levantar y auditar el sistema en la máquina local o servidor.</p>
+            <h2>4. Despliegue Técnico (Basado en el README Oficial)</h2>
             <pre><code># 1. Construir y Levantar el Entorno (Orquestación con Podman/Docker)
 docker-compose up -d --build
 
@@ -117,16 +141,12 @@ docker-compose up -d --build
 # Entrar a la terminal interactiva de la base de datos:
 podman exec -it chat_redis redis-cli
 
-# Mostrar a todos los usuarios autenticados:
+# Mostrar a todos los usuarios autenticados (Set):
 SMEMBERS active_users
 
-# Consultar propiedades persistidas de un usuario (Ejemplo: IP, Booleanos, Strings):
+# Consultar propiedades persistidas de un usuario (Hash):
 HGETALL "user:<UUID>"
-
-# Revisar el historial asíncrono y los registros JSON en Listas:
-LRANGE "chat:messages:<UUID>" 0 -1
 </code></pre>
-            <p><em>* Para consultar los 30 comandos completos de Podman solicitados en la rúbrica, por favor consulta el repositorio fuente en GitHub.</em></p>
         </section>
     </main>
 

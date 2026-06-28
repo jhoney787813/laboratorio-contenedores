@@ -197,3 +197,21 @@ pre {
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
+
+.alert-box {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 15px;
+    margin-top: 25px;
+    border-radius: 4px;
+    color: #92400e;
+}
+.alert-box ul {
+    margin-top: 10px;
+}
+.alert-box code {
+    background: #fde68a;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
