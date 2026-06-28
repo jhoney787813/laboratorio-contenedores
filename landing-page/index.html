@@ -165,7 +165,52 @@ await redisSubscriber.subscribe('admin_broadcast', async (payloadStr) => {
         </section>
 
         <section class="card">
-            <h2>5. Estructura de Base de Datos y RedisInsight</h2>
+            <h2>5. Orquestación de Microservicios (Docker Compose)</h2>
+            <p>Para levantar todos los componentes de manera sincronizada y bajo una misma red virtual, utilizamos <code>docker-compose.yml</code>. A continuación, explicamos la configuración:</p>
+
+            <pre><code># docker-compose.yml
+services:
+  chat_redis:
+    image: redis:7-alpine
+    container_name: chat_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chat_network
+
+  chat_server:
+    build: ./chat-server
+    container_name: chat_server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - chat_redis
+    environment:
+      - REDIS_URL=redis://chat_redis:6379
+    networks:
+      - chat_network
+
+  admin_app:
+    build: ./admin-app
+    # ... configuración similar ...
+    
+  chat_bot:
+    build: ./chat-bot
+    # ... configuración similar ...</code></pre>
+
+            <h3>¿Por qué usamos una imagen precompilada para Redis?</h3>
+            <p>En el archivo Compose notamos que para el Chat Server y el Admin usamos <code>build: ./carpeta</code> (es decir, compilamos nuestro propio código Node.js local). Sin embargo, para la base de datos indicamos <code>image: redis:7-alpine</code>. Esto se hace por las siguientes razones de arquitectura moderna:</p>
+            <ul>
+                <li><strong>Eficiencia y Estándar de la Industria:</strong> Redis es un software de grado empresarial escrito en C. Compilarlo desde cero en cada máquina de desarrollo tomaría tiempo y sería propenso a errores. Usar la imagen oficial precompilada (ofrecida por Docker Hub) nos asegura tener un ejecutable optimizado, seguro y probado mundialmente.</li>
+                <li><strong>Versión Alpine (Ligera):</strong> La etiqueta <code>alpine</code> indica que la imagen está basada en Alpine Linux, un sistema operativo minimalista que pesa apenas unos 5 Megabytes. Esto reduce drásticamente la superficie de ataque (más seguro) y agiliza la descarga e instanciación del contenedor en segundos.</li>
+                <li><strong>Persistencia de Volúmenes:</strong> Aunque la imagen sea efímera, el estado del chat se resguarda configurando la regla <code>volumes: - redis_data:/data</code>, lo que garantiza que el historial y usuarios en memoria no se pierdan al reiniciar el contenedor.</li>
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>6. Estructura de Base de Datos y RedisInsight</h2>
             <p>Nuestra base de datos <strong>Redis</strong> gestiona varios tipos de datos estructurados para persistir el estado de la aplicación. Para auditar y visualizar esta información gráficamente, <strong>recomendamos utilizar <a href="https://redis.com/redis-enterprise/redis-insight/" target="_blank">RedisInsight</a></strong>.</p>
             
             <h3>Composición de Datos Persistidos</h3>
@@ -198,7 +243,7 @@ await redisSubscriber.subscribe('admin_broadcast', async (payloadStr) => {
         </section>
 
         <section class="card">
-            <h2>6. Despliegue Técnico (Basado en el README Oficial)</h2>
+            <h2>7. Despliegue Técnico (Basado en el README Oficial)</h2>
             <pre><code># 1. Construir y Levantar el Entorno (Orquestación con Podman/Docker)
 docker-compose up -d --build
 
