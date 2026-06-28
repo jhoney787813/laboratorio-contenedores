@@ -26,9 +26,29 @@ async function startServer() {
     console.log('Connected to Redis');
 
     // Subscribe to Admin broadcasts
-    await redisSubscriber.subscribe('admin_broadcast', (message) => {
-        console.log('Admin broadcast received:', message);
-        io.emit('adminAlert', message); // Emite a todos los clientes conectados
+    await redisSubscriber.subscribe('admin_broadcast', async (payloadStr) => {
+        try {
+            const data = JSON.parse(payloadStr);
+            console.log('Admin broadcast received for users:', data.userIds);
+            
+            // Si hay usuarios específicos, enviar solo a ellos
+            if (data.userIds && data.userIds.length > 0) {
+                const sockets = await io.fetchSockets();
+                data.userIds.forEach(id => {
+                    const userSocket = sockets.find(s => s.userId === id);
+                    if (userSocket) {
+                        io.to(userSocket.id).emit('adminAlert', data.message);
+                    }
+                });
+            } else {
+                // Emite a todos los clientes conectados si no hay IDs (Fallback / Broadcast total)
+                io.emit('adminAlert', data.message); 
+            }
+        } catch (error) {
+            // Compatibilidad con la versión anterior si el admin envía solo texto
+            console.log('Admin broadcast (text) received:', payloadStr);
+            io.emit('adminAlert', payloadStr);
+        }
     });
 
     io.on('connection', async (socket) => {

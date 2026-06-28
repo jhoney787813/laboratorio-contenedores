@@ -30,14 +30,15 @@ async function startServer() {
         }
     });
 
-    // Endpoint para enviar un mensaje masivo (Broadcast)
+    // Endpoint para enviar un mensaje masivo o selectivo
     app.post('/api/broadcast', async (req, res) => {
-        const { message } = req.body;
+        const { message, userIds } = req.body;
         if (!message) return res.status(400).json({ error: 'Message is required' });
 
         try {
-            // Publica el mensaje en el canal 'admin_broadcast'
-            await redisClient.publish('admin_broadcast', message);
+            // Publica el mensaje en el canal 'admin_broadcast' en formato JSON
+            const payload = JSON.stringify({ message, userIds: userIds || [] });
+            await redisClient.publish('admin_broadcast', payload);
             res.json({ success: true, message: 'Broadcast sent' });
         } catch (error) {
             res.status(500).json({ error: 'Error sending broadcast' });

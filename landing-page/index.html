@@ -129,7 +129,76 @@
         </section>
 
         <section class="card">
-            <h2>4. Despliegue Técnico (Basado en el README Oficial)</h2>
+            <h2>4. Estructura del Código y Subproyectos</h2>
+            <p>La solución se divide en tres microservicios principales construidos en Node.js:</p>
+
+            <h3>1. Admin App (Panel de Control)</h3>
+            <p>Se encarga de visualizar a los usuarios activos y despachar mensajes mediante Pub/Sub. Este es el fragmento donde se emite una alerta selectiva a usuarios elegidos:</p>
+            <pre><code>// admin-app/server.js
+app.post('/api/broadcast', async (req, res) => {
+    const { message, userIds } = req.body;
+    // Publica el mensaje en el canal 'admin_broadcast' en formato JSON
+    const payload = JSON.stringify({ message, userIds });
+    await redisClient.publish('admin_broadcast', payload);
+    res.json({ success: true, message: 'Broadcast sent' });
+});</code></pre>
+            <p><em>Explicación:</em> El administrador no se conecta directamente con los clientes. Simplemente emite un evento al bus de mensajería (Redis) usando <code>publish</code>. Esto garantiza el desacoplamiento arquitectónico.</p>
+
+            <h3>2. Chat Server (WebSockets)</h3>
+            <p>Maneja el túnel bidireccional TCP con los clientes. Está suscrito al canal del admin para reaccionar asíncronamente a los mensajes:</p>
+            <pre><code>// chat-server/server.js
+await redisSubscriber.subscribe('admin_broadcast', async (payloadStr) => {
+    const data = JSON.parse(payloadStr);
+    
+    // Filtramos los sockets si se seleccionaron usuarios específicos
+    if (data.userIds && data.userIds.length > 0) {
+        const sockets = await io.fetchSockets();
+        data.userIds.forEach(id => {
+            const userSocket = sockets.find(s => s.userId === id);
+            if (userSocket) io.to(userSocket.id).emit('adminAlert', data.message);
+        });
+    } else {
+        io.emit('adminAlert', data.message); // Broadcast global
+    }
+});</code></pre>
+            <p><em>Explicación:</em> Este servidor intercepta el evento Pub/Sub, busca las conexiones WebSocket activas (sockets) que corresponden a los UUID elegidos por el admin y envía el mensaje <code>adminAlert</code> únicamente a ellos, logrando un envío dirigido y aislado.</p>
+        </section>
+
+        <section class="card">
+            <h2>5. Estructura de Base de Datos y RedisInsight</h2>
+            <p>Nuestra base de datos <strong>Redis</strong> gestiona varios tipos de datos estructurados para persistir el estado de la aplicación. Para auditar y visualizar esta información gráficamente, <strong>recomendamos utilizar <a href="https://redis.com/redis-enterprise/redis-insight/" target="_blank">RedisInsight</a></strong>.</p>
+            
+            <h3>Composición de Datos Persistidos</h3>
+            <pre><code>{
+  "Keys": {
+    // 1. SET (Conjunto): Guarda IDs únicos de usuarios activos
+    "active_users": [
+      "c1a2b3c4-d5e6-7890-abcd-ef1234567890"
+    ],
+    
+    // 2. HASH (Diccionario): Almacena las propiedades del usuario (Tipos primitivos mapeados)
+    "user:c1a2b3c4-d5e6-7890-abcd-ef1234567890": {
+      "id": "c1a2b3c4-d5e6-7890-abcd-ef1234567890",
+      "username": "Jhon",
+      "is_bot": "false",             // Booleano representado en String
+      "created_at": "2024-10-31T...", // Date/Timestamp
+      "status_code": "1",             // Entero
+      "score": "0.0",                 // Flotante
+      "ip_address": "::1"
+    },
+    
+    // 3. LIST (Lista Enlazada): Historial ordenado de mensajes del chat
+    "chat:messages:c1a2b3c4-d5e6-7890-abcd-ef1234567890": [
+      "{\"msg_id\":\"xyz\",\"sender_id\":\"c1a2b3c4...\",\"content\":\"hola\",\"sent_at\":\"...\"}",
+      "{\"msg_id\":\"abc\",\"sender_id\":\"bot\",\"content\":\"¡Hola! Soy el asistente.\",\"sent_at\":\"...\"}"
+    ]
+  }
+}</code></pre>
+            <p><em>Relación con Podman:</em> Estos datos residen en la memoria RAM del contenedor <code>chat_redis</code>, garantizando que el Chat Server y el Admin App (ambos contenedores Node.js "Stateless") puedan compartir y consultar un mismo estado central en microsegundos sin necesidad de base de datos en disco rígido.</p>
+        </section>
+
+        <section class="card">
+            <h2>6. Despliegue Técnico (Basado en el README Oficial)</h2>
             <pre><code># 1. Construir y Levantar el Entorno (Orquestación con Podman/Docker)
 docker-compose up -d --build
 

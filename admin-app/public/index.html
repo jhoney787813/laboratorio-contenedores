@@ -82,6 +82,7 @@
         <table id="usersTable">
             <thead>
                 <tr>
+                    <th><input type="checkbox" id="selectAllCheckbox" title="Seleccionar todos"></th>
                     <th>Username</th>
                     <th>IP Address</th>
                     <th>Status</th>
@@ -117,6 +118,7 @@
             users.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td><input type="checkbox" class="user-checkbox" value="${u.id}"></td>
                     <td><strong>${u.username}</strong></td>
                     <td>${u.ip_address}</td>
                     <td><span style="color: green">En línea</span></td>
@@ -129,10 +131,25 @@
         }
     }
 
+    // Lógica del checkbox de seleccionar todos
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    selectAllCheckbox.addEventListener('change', (e) => {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+
     // Enviar broadcast
     sendBroadcastBtn.addEventListener('click', async () => {
         const msg = broadcastInput.value.trim();
         if (!msg) return;
+
+        const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+        const userIds = Array.from(checkboxes).map(cb => cb.value);
+
+        if (userIds.length === 0) {
+            alert('Por favor selecciona al menos un usuario.');
+            return;
+        }
 
         sendBroadcastBtn.disabled = true;
         sendBroadcastBtn.textContent = 'Enviando...';
@@ -141,15 +158,15 @@
             await fetch('/api/broadcast', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg })
+                body: JSON.stringify({ message: msg, userIds: userIds })
             });
             broadcastInput.value = '';
-            alert('¡Mensaje global enviado con éxito!');
+            alert('¡Mensaje enviado con éxito!');
         } catch (error) {
             alert('Error al enviar el mensaje');
         } finally {
             sendBroadcastBtn.disabled = false;
-            sendBroadcastBtn.textContent = 'Enviar Alerta a Todos';
+            sendBroadcastBtn.textContent = 'Enviar Alerta';
         }
     });
 
