@@ -72,36 +72,61 @@
         </section>
 
         <section class="card">
-            <h2>2. Paso a Paso de la Construcción</h2>
-            <ol class="steps-list">
-                <li>
-                    <strong>Diseño de la Arquitectura y DDD:</strong> Se modelaron los agregados de dominio (Usuario y Mensaje) y se definió el uso de Redis para almacenar más de 15 tipos de datos distintos mediante Hashes y Listas.
-                </li>
-                <li>
-                    <strong>Desarrollo del Servidor de Chat:</strong> Se construyó una aplicación con Express y Socket.io para manejar conexiones entrantes y generar salas privadas para cada usuario.
-                </li>
-                <li>
-                    <strong>Creación del Bot Autónomo:</strong> Se implementó un cliente Socket.io en un proceso Node.js separado que responde automáticamente a palabras clave en las salas privadas.
-                </li>
-                <li>
-                    <strong>Implementación del Panel de Administración:</strong> Se construyó un microservicio para visualizar la base de datos en tiempo real y enviar alertas mediante Redis Pub/Sub.
-                </li>
-                <li>
-                    <strong>Contenerización:</strong> Se escribieron los <code>Dockerfile</code> para cada servicio Node.js y se orquestaron utilizando <code>docker-compose.yml</code> asegurando la persistencia a través de volúmenes compartidos.
-                </li>
-            </ol>
+            <h2>2. Justificación: Arquitectura Moderna Orientada a Microservicios</h2>
+            <p>El diseño de esta solución responde a los <strong>estándares actuales de la industria para arquitecturas escalables y desacopladas</strong>:</p>
+            <ul>
+                <li><strong>Desacoplamiento mediante Eventos (Pub/Sub):</strong> En lugar de que el servidor de administración se comunique directamente con el servidor de chat mediante HTTP (lo cual genera un acoplamiento fuerte y latencia), se utiliza el patrón de diseño Publish/Subscribe nativo de Redis. Esto significa que los microservicios son agnósticos unos de otros; el administrador simplemente dispara un evento global, garantizando alta cohesión y bajo acoplamiento.</li>
+                <li><strong>Comunicación Asíncrona (WebSockets):</strong> Las aplicaciones modernas en tiempo real evitan el "polling" (consultas repetitivas al servidor). Al usar Socket.io sobre Node.js, mantenemos conexiones TCP persistentes y bidireccionales de baja latencia.</li>
+                <li><strong>Contenerización Aislada:</strong> Cada componente (Chat, Bot, Admin, DB) posee su propio `Dockerfile`. Esto asegura el principio de responsabilidad única. Si el Chat Bot falla, no afecta al Chat Server; si necesitamos escalar el servidor web, podemos instanciar réplicas sin tocar la lógica de la base de datos o del panel de administración.</li>
+                <li><strong>Single Source of Truth (SSOT):</strong> Redis actúa como la única fuente de verdad rápida en memoria. Mantiene un almacenamiento de estado centralizado, permitiendo que las aplicaciones servidoras (Node.js) se mantengan <em>Stateless</em> (sin estado interno). Esto facilita escalar horizontalmente en la nube de ser necesario.</li>
+            </ul>
         </section>
 
         <section class="card">
-            <h2>3. Pruebas y Validación del Sistema</h2>
-            <p>Sigue estos pasos para probar la integridad de la aplicación de software:</p>
-            <ul>
-                <li><strong>Levantar el entorno:</strong> Ejecuta <code>docker-compose up -d --build</code> en la raíz del proyecto.</li>
-                <li><strong>Prueba del Cliente:</strong> Ingresa a <code>http://localhost:3000</code>, escribe tu nombre y envía un mensaje como "hola" o "docker". El Bot debería responder en unos segundos.</li>
-                <li><strong>Prueba de Aislamiento:</strong> Abre una ventana de incógnito, entra al chat con otro nombre. Verifica que los historiales son completamente independientes (chats 1-a-1).</li>
-                <li><strong>Prueba de Administración y Pub/Sub:</strong> Abre <code>http://localhost:4000</code>. Envía una alerta global. Verifica en las ventanas del chat que la alerta roja aparece instantáneamente, validando la comunicación asíncrona a través de Redis.</li>
-                <li><strong>Auditoría de BD:</strong> Ingresa al contenedor de Redis (<code>podman exec -it chat_redis redis-cli</code>) y usa el comando <code>HGETALL user:ID</code> para validar la integridad y tipos de los datos persistidos.</li>
-            </ul>
+            <h2>3. Demostración Funcional</h2>
+            <p>A continuación se evidencia el funcionamiento práctico de las aplicaciones cliente, el servidor y el flujo de comunicación interna:</p>
+            
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h3>Chat Independiente y Bot 🤖</h3>
+                    <!-- Nota para el estudiante: Reemplaza chat-demo.gif por la grabación real de tu pantalla -->
+                    <img src="chat-demo.gif" alt="Animación demostrando el uso del chat web comunicándose de forma privada con el bot" class="responsive-gif" onerror="this.src='https://via.placeholder.com/600x400?text=Sube+tu+archivo+chat-demo.gif+aqui'">
+                    <p>En este GIF se aprecia la interfaz tipo Glassmorphism. El usuario interactúa de forma directa y aislada (1-a-1) con el Bot autónomo.</p>
+                </div>
+
+                <div class="demo-item">
+                    <h3>Panel de Administración 🛠️</h3>
+                    <!-- Nota para el estudiante: Reemplaza admin-demo.gif por la grabación real de tu pantalla -->
+                    <img src="admin-demo.gif" alt="Animación del panel de administración enviando un broadcast" class="responsive-gif" onerror="this.src='https://via.placeholder.com/600x400?text=Sube+tu+archivo+admin-demo.gif+aqui'">
+                    <p>El administrador visualiza las IPs de los conectados. Al enviar una alerta por Broadcast a través de Redis Pub/Sub, ésta aparece en la pantalla del usuario inmediatamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>4. Instrucciones de Ejecución (Basado en el README Oficial)</h2>
+            <p>El siguiente es el extracto de la documentación principal para levantar y auditar el sistema en la máquina local o servidor.</p>
+            <pre><code># 1. Construir y Levantar el Entorno (Orquestación con Podman/Docker)
+docker-compose up -d --build
+
+# 2. Uso de la Aplicación
+• Abre tu navegador en: http://localhost:3000 (Chat Web del Usuario).
+• Abre el Panel Admin en: http://localhost:4000 (Envío de alertas masivas).
+
+# 3. Auditoría de Datos en Base de Datos (Validación de Tipos)
+# Entrar a la terminal interactiva de la base de datos:
+podman exec -it chat_redis redis-cli
+
+# Mostrar a todos los usuarios autenticados:
+SMEMBERS active_users
+
+# Consultar propiedades persistidas de un usuario (Ejemplo: IP, Booleanos, Strings):
+HGETALL "user:<UUID>"
+
+# Revisar el historial asíncrono y los registros JSON en Listas:
+LRANGE "chat:messages:<UUID>" 0 -1
+</code></pre>
+            <p><em>* Para consultar los 30 comandos completos de Podman solicitados en la rúbrica, por favor consulta el repositorio fuente en GitHub.</em></p>
         </section>
     </main>
 
