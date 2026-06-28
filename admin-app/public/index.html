@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #0f172a;
+        }
+        .broadcast-panel {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #bfdbfe;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover { background-color: #1d4ed8; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th { background-color: #f1f5f9; }
+        .refresh-btn { background-color: #10b981; margin-bottom: 15px; }
+        .refresh-btn:hover { background-color: #059669; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Panel de Control 🛠️</h1>
+    
+    <div class="broadcast-panel">
+        <h2>Enviar Mensaje Global (Broadcast)</h2>
+        <input type="text" id="broadcastInput" placeholder="Escribe el mensaje que verán todos los usuarios..." autocomplete="off">
+        <button id="sendBroadcastBtn">Enviar Alerta a Todos</button>
+    </div>
+
+    <div>
+        <h2>Usuarios Conectados</h2>
+        <button class="refresh-btn" id="refreshUsersBtn">Actualizar Lista</button>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                    <th>Connected At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se inyectarán aquí -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const broadcastInput = document.getElementById('broadcastInput');
+    const sendBroadcastBtn = document.getElementById('sendBroadcastBtn');
+    const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+    const usersTableBody = document.querySelector('#usersTable tbody');
+
+    // Cargar usuarios
+    async function loadUsers() {
+        usersTableBody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
+        try {
+            const res = await fetch('/api/users');
+            const users = await res.json();
+            
+            usersTableBody.innerHTML = '';
+            if (users.length === 0) {
+                usersTableBody.innerHTML = '<tr><td colspan="4">No hay usuarios conectados</td></tr>';
+                return;
+            }
+
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.ip_address}</td>
+                    <td><span style="color: green">En línea</span></td>
+                    <td>${new Date(u.created_at).toLocaleTimeString()}</td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        } catch (error) {
+            usersTableBody.innerHTML = '<tr><td colspan="4">Error cargando usuarios</td></tr>';
+        }
+    }
+
+    // Enviar broadcast
+    sendBroadcastBtn.addEventListener('click', async () => {
+        const msg = broadcastInput.value.trim();
+        if (!msg) return;
+
+        sendBroadcastBtn.disabled = true;
+        sendBroadcastBtn.textContent = 'Enviando...';
+
+        try {
+            await fetch('/api/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+            broadcastInput.value = '';
+            alert('¡Mensaje global enviado con éxito!');
+        } catch (error) {
+            alert('Error al enviar el mensaje');
+        } finally {
+            sendBroadcastBtn.disabled = false;
+            sendBroadcastBtn.textContent = 'Enviar Alerta a Todos';
+        }
+    });
+
+    refreshUsersBtn.addEventListener('click', loadUsers);
+    
+    // Carga inicial
+    loadUsers();
+</script>
+
+</body>
+</html>

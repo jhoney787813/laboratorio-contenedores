@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: chat_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chat_network
+    command: redis-server --appendonly yes
+
+  chat-server:
+    build: 
+      context: ./chat-server
+    container_name: chat_server
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - chat_network
+
+  chat-bot:
+    build:
+      context: ./chat-bot
+    container_name: chat_bot
+    environment:
+      - CHAT_SERVER_URL=http://chat-server:3000
+    depends_on:
+      - chat-server
+    networks:
+      - chat_network
+
+  admin-app:
+    build:
+      context: ./admin-app
+    container_name: admin_app
+    ports:
+      - "4000:4000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - chat_network
+
+volumes:
+  redis_data:
+
+networks:
+  chat_network:
+    driver: bridge

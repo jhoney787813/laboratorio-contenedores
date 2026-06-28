@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="login-container" class="container glass">
+        <h1>Bienvenido al Chat</h1>
+        <p>Ingresa tu nombre de usuario para unirte a la sala.</p>
+        <input type="text" id="usernameInput" placeholder="Nombre de usuario" autocomplete="off" />
+        <button id="joinBtn">Entrar</button>
+    </div>
+
+    <div id="chat-container" class="container glass hidden">
+        <div class="chat-header">
+            <h2>Sala Principal</h2>
+            <span id="currentUser"></span>
+        </div>
+        <div id="messages" class="messages-area"></div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje..." autocomplete="off" />
+            <button id="sendBtn">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Contenedores - Arquitectura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Laboratorio de Contenedores: Sistema de Chat y Bot</h1>
+            <p class="subtitle">Despliegue de microservicios usando Podman/Docker y Redis</p>
+            <div class="author-info">
+                <strong>Autor:</strong> Jhon Edison Hincapié García <br>
+                <strong>Código:</strong> 100097437 <br>
+                <strong>Programa:</strong> Maestría en Arquitectura de Software <br>
+                <strong>Institución:</strong> Politécnico Grancolombiano
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>1. Arquitectura del Sistema (Dinámica)</h2>
+            <p>El siguiente diagrama representa los 4 contenedores principales de la solución y los flujos de comunicación (HTTP, WebSockets, Pub/Sub) entre ellos. Las animaciones muestran el tráfico de datos en tiempo real.</p>
+            
+            <div class="architecture-diagram">
+                <!-- User Browser -->
+                <div class="node user-node" id="node-user">
+                    🌐 Cliente Web (Usuario)
+                </div>
+                
+                <!-- Chat Server -->
+                <div class="node server-node" id="node-chat-server">
+                    🖥️ Chat Server (Node.js)
+                </div>
+                
+                <!-- Admin App -->
+                <div class="node server-node" id="node-admin-app">
+                    🛠️ Admin App (Node.js)
+                </div>
+
+                <!-- Bot -->
+                <div class="node bot-node" id="node-bot">
+                    🤖 Chat Bot (Node.js)
+                </div>
+
+                <!-- Redis -->
+                <div class="node db-node" id="node-redis">
+                    🗄️ Redis (BD & Pub/Sub)
+                </div>
+
+                <!-- Conexiones animadas (Representadas por CSS) -->
+                <div class="connection h-connection" style="top: 80px; left: 160px; width: 140px;">
+                    <div class="packet"></div>
+                </div>
+                <div class="connection v-connection" style="top: 130px; left: 375px; height: 100px;">
+                    <div class="packet"></div>
+                </div>
+                <div class="connection h-connection" style="top: 260px; left: 450px; width: 140px;">
+                    <div class="packet"></div>
+                </div>
+                <div class="connection h-connection" style="top: 80px; left: 450px; width: 140px;">
+                    <div class="packet"></div>
+                </div>
+                <div class="connection v-connection" style="top: 130px; left: 675px; height: 100px;">
+                    <div class="packet"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>2. Paso a Paso de la Construcción</h2>
+            <ol class="steps-list">
+                <li>
+                    <strong>Diseño de la Arquitectura y DDD:</strong> Se modelaron los agregados de dominio (Usuario y Mensaje) y se definió el uso de Redis para almacenar más de 15 tipos de datos distintos mediante Hashes y Listas.
+                </li>
+                <li>
+                    <strong>Desarrollo del Servidor de Chat:</strong> Se construyó una aplicación con Express y Socket.io para manejar conexiones entrantes y generar salas privadas para cada usuario.
+                </li>
+                <li>
+                    <strong>Creación del Bot Autónomo:</strong> Se implementó un cliente Socket.io en un proceso Node.js separado que responde automáticamente a palabras clave en las salas privadas.
+                </li>
+                <li>
+                    <strong>Implementación del Panel de Administración:</strong> Se construyó un microservicio para visualizar la base de datos en tiempo real y enviar alertas mediante Redis Pub/Sub.
+                </li>
+                <li>
+                    <strong>Contenerización:</strong> Se escribieron los <code>Dockerfile</code> para cada servicio Node.js y se orquestaron utilizando <code>docker-compose.yml</code> asegurando la persistencia a través de volúmenes compartidos.
+                </li>
+            </ol>
+        </section>
+
+        <section class="card">
+            <h2>3. Pruebas y Validación del Sistema</h2>
+            <p>Sigue estos pasos para probar la integridad de la aplicación de software:</p>
+            <ul>
+                <li><strong>Levantar el entorno:</strong> Ejecuta <code>docker-compose up -d --build</code> en la raíz del proyecto.</li>
+                <li><strong>Prueba del Cliente:</strong> Ingresa a <code>http://localhost:3000</code>, escribe tu nombre y envía un mensaje como "hola" o "docker". El Bot debería responder en unos segundos.</li>
+                <li><strong>Prueba de Aislamiento:</strong> Abre una ventana de incógnito, entra al chat con otro nombre. Verifica que los historiales son completamente independientes (chats 1-a-1).</li>
+                <li><strong>Prueba de Administración y Pub/Sub:</strong> Abre <code>http://localhost:4000</code>. Envía una alerta global. Verifica en las ventanas del chat que la alerta roja aparece instantáneamente, validando la comunicación asíncrona a través de Redis.</li>
+                <li><strong>Auditoría de BD:</strong> Ingresa al contenedor de Redis (<code>podman exec -it chat_redis redis-cli</code>) y usa el comando <code>HGETALL user:ID</code> para validar la integridad y tipos de los datos persistidos.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Jhon Edison Hincapié García - Arquitectura de Software</p>
+    </footer>
+</body>
+</html>
