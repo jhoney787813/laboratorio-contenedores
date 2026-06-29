@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Consolidado Final - Maestría en Arquitectura de Software</title>
+    <style>
+        :root {
+            --primary-color: #002F6C;
+            /* Azul Institucional Poli */
+            --secondary-color: #00B159;
+            /* Verde Poli accent */
+            --text-color: #2D3748;
+            --bg-light: #F7FAFC;
+            --border-color: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            background-color: #ffffff;
+        }
+
+        /* Contenedor principal estilo reporte */
+        .report-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Encabezado e Imagen */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            max-width: 260px;
+            height: auto;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 30px 0;
+        }
+
+        /* Bloque de Metadatos del Autor */
+        .meta-box {
+            background-color: var(--bg-light);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+            display: inline-block;
+            text-align: left;
+            min-width: 320px;
+        }
+
+        .meta-box p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        .meta-box strong {
+            color: var(--primary-color);
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 40px 0;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* Enlaces Oficiales Estilizados */
+        .links-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .links-section li {
+            margin-bottom: 15px;
+            background: var(--bg-light);
+            padding: 12px 18px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .links-section strong {
+            display: block;
+            color: #1A202C;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .links-section a {
+            color: #3182CE;
+            text-decoration: none;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .links-section a:hover {
+            text-decoration: underline;
+        }
+
+        /* Lista de Logros */
+        .achievements-list {
+            padding-left: 20px;
+        }
+
+        .achievements-list li {
+            margin-bottom: 18px;
+            font-size: 15px;
+        }
+
+        .achievements-list strong {
+            color: var(--primary-color);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 12px;
+            color: #A0AEC0;
+            font-style: italic;
+        }
+
+        /* Optimización para impresión en PDF */
+        @media print {
+            body {
+                padding: 20px;
+            }
+
+            .links-section li {
+                background: none;
+                page-break-inside: avoid;
+            }
+
+            .meta-box {
+                background: none;
+                border: 1px solid var(--border-color);
+                border-left: 4px solid var(--primary-color);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="report-container">
+
+        <div class="header">
+            <img src="https://www.poli.edu.co/themes/custom/ptecnico2023/logo-politecnico-grancolombiano-blue.svg"
+                alt=" Politécnico Grancolombiano" class="logo">
+            <h1>Maestría en Arquitectura de Software</h1>
+            <h2>Consolidado Final: Laboratorio de Contenedores</h2>
+
+            <div class="meta-box">
+                <p><strong>Autor:</strong> Jhon Edison Hincapié García</p>
+                <p><strong>Código:</strong> 100097437</p>
+                <p><strong>Institución:</strong> Politécnico Grancolombiano</p>
+                <p><strong>Fecha:</strong> Junio de 2026</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="links-section">
+            <h3>🔗 Enlaces Oficiales de la Entrega</h3>
+            <ul>
+                <li>
+                    <strong>Landing Page (Arquitectura, Código y Documentación):</strong>
+                    <a href="https://jhoney787813.github.io/laboratorio-contenedores/"
+                        target="_blank">https://jhoney787813.github.io/laboratorio-contenedores/</a>
+                </li>
+                <li>
+                    <strong>Video de Sustentación (YouTube):</strong>
+                    <a href="https://youtu.be/AIi_mLhyJ-Y" target="_blank">https://youtu.be/AIi_mLhyJ-Y</a>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <h3>🏆 Resumen de Logros de la Entrega</h3>
+            <ol class="achievements-list">
+                <li>
+                    <strong>Diseño Guiado por Dominio (DDD):</strong>
+                    Se logró abstraer y separar la lógica de negocio de la infraestructura tecnológica, evidenciando un
+                    diseño escalable orientado a ecosistemas multi-agentes.
+                </li>
+                <li>
+                    <strong>Despliegue y Orquestación:</strong>
+                    Implementación éxito de 4 microservicios aislados (Chat Server, Admin App, Chat Bot, Redis)
+                    levantados sincronizadamente mediante <code>docker-compose</code> (Podman) bajo una única red
+                    virtual.
+                </li>
+                <li>
+                    <strong>Arquitectura Desacoplada (Pub/Sub):</strong>
+                    Se implementó el patrón <em>Publish/Subscribe</em> nativo de Redis para asegurar que el panel
+                    administrador pueda emitir alertas globales o selectivas sin necesidad de acoplamiento directo HTTP
+                    con los clientes web.
+                </li>
+                <li>
+                    <strong>Persistencia Avanzada en Memoria:</strong>
+                    Demostración práctica del uso de una base de datos NoSQL ultrarrápida como <em>Single Source of
+                        Truth</em> (SSOT), mapeando más de 15 tipos de datos en la memoria a través de conjuntos
+                    (<code>SET</code>), diccionarios (<code>HASH</code>) y listas (<code>LIST</code>), auditable
+                    visualmente con RedisInsight.
+                </li>
+                <li>
+                    <strong>Comunicación en Tiempo Real:</strong>
+                    Configuración óptima de WebSockets (Socket.io) para establecer túneles bidireccionales persistentes,
+                    habilitando conversaciones de baja latencia entre los clientes y el agente (Bot) autónomo.
+                </li>
+            </ol>
+        </div>
+
+        <div class="footer">
+            <p>Documento generado automáticamente como comprobante de entrega de la Actividad Sumativa.</p>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
